@@ -29,8 +29,61 @@
 </head>
 <body>
 
-<!-- Where the navigation will be injected -->
-<div id="navbar"></div>
+  <div class="site-wrap">
+
+    <div class="site-mobile-menu">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close mt-3">
+          <span class="icon-close2 js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+    
+
+
+
+      <header class="site-navbar py-3" role="banner">
+
+      <div class="container-fluid">
+        <div class="row align-items-center">
+
+          <div class="col-6 col-xl-2" data-aos="fade-down">
+            <h1 class="mb-0"><a href="index.html" class="text-white h2 mb-0">Tim Howard</a></h1>
+          </div>
+          <div class="col-10 col-md-8 d-none d-xl-block" data-aos="fade-down">
+            <nav class="site-navigation position-relative text-right text-lg-center" role="navigation">
+
+              <ul class="site-menu js-clone-nav mx-auto d-none d-lg-block">
+                <li class="active"><a href="index.html">Home</a></li>
+                <li class="has-children">
+                  <a href="landscape_gallery.html">Photos</a>
+                  <ul class="dropdown">
+                    <li><a href="baker_gallery.html">Landscapes</a></li>
+                    <li><a href="baker_gallery.html">Sport</a></li>
+                    <li class="has-children">
+                      <a href="#">Trips</a>
+                      <ul class="dropdown">
+                        <li><a href="baker_gallery.html">Mt Baker</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li><a href="about.html">About</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div class="col-6 col-xl-2 text-right" data-aos="fade-down">
+            <div class="d-inline-block d-xl-none ml-md-0 mr-auto py-3" style="position: relative; top: 3px;">
+              <a href="#" class="site-menu-toggle js-menu-toggle text-white"><span class="icon-menu h3"></span></a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+    </header>
 
 
  <div class="px-0" data-aos="fade" data-aos-delay="500">
@@ -48,10 +101,10 @@
                 <img src="images\baker\PXL_20250705_115433675.RAW-02.ORIGINAL.jpg" class="d-block w-100" alt="Feature 1" style="height: 100vh; object-fit: cover;">
               </div>
               <div class="carousel-item" style="height: 100vh;">
-                <img src="images\baker\PXL_20250705_122607174.RAW-02.ORIGINAL-Edit.jpg" class="d-block w-100" alt="Feature 2" style="height: 100vh; object-fit: cover;">
+                <img src="images\action\20250206-City_Skyline-70837-Pano.jpg" class="d-block w-100" alt="Feature 2" style="height: 100vh; object-fit: cover;">
               </div>
               <div class="carousel-item" style="height: 100vh;">
-                <img src="images\PXL_20250824_215012458.RAW-02.ORIGINAL.jpg" class="d-block w-100" alt="Feature 3" style="height: 100vh; object-fit: cover;">
+                <img src="images/hero_bg_3.jpg" class="d-block w-100" alt="Feature 3" style="height: 100vh; object-fit: cover;">
               </div>
             </div>
             <a class="carousel-control-prev" href="#mainCarousel" role="button" data-slide="prev">
@@ -96,36 +149,6 @@
   <script src="js/jquery.mousewheel.min.js"></script>
 
   <script src="js/main.js"></script>
-
-  <script>
-  // Run after the DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  loadNavbar();
-
-  function loadNavbar() {
-    fetch("navbar.html")
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById("navbar").innerHTML = html;
-        setupMobileMenu(); // Attach event after HTML is in the DOM
-      })
-      .catch(err => console.error("Failed to load navbar:", err));
-  }
-
-  function setupMobileMenu() {
-    const toggle = document.querySelector(".js-menu-toggle");
-    const mobileMenu = document.querySelector(".site-mobile-menu");
-
-    if (toggle && mobileMenu) {
-      toggle.addEventListener("click", (e) => {
-        e.preventDefault();
-        mobileMenu.classList.toggle("active");
-      });
-    }
-  }
-});
-
-</script>
   
   <script>
     $(document).ready(function(){

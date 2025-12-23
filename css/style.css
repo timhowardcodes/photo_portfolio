@@ -10,6 +10,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.site-mobile-menu ul {
+  list-style: none;
+}
+
 /* Typography tweaks for a modern, minimalist photography look */
 h1, h2, h3, h4, h5, h6, .site-section-heading {
   font-family: 'Open Sans';
@@ -1173,6 +1177,46 @@ a {
   .btn-outline-white:hover {
     background: #fff;
     color: #000; }
+
+.image-wrap-1 {
+  display: block;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  margin-bottom: 30px; }
+  .image-wrap-1:before {
+    position: absolute;
+    content: "";
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0);
+    -webkit-transition: .3s all ease;
+    -o-transition: .3s all ease;
+    transition: .3s all ease; }
+  .image-wrap-1 img {
+    -webkit-transition: all .1s ease-in-out; 
+}
+  .image-wrap-1:hover img {
+    filter: none;
+    -webkit-filter: grayscale(0);
+    -webkit-transform: scale(1.01); }
+  .image-wrap-1 .image-info {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); }
+    .image-wrap-1 .image-info h2 {
+      color: #fff; }
+  .image-wrap-1:hover:before {
+    background: rgba(0, 0, 0, 0.4);
+    content: ""; }
 
 .image-wrap-2 {
   display: block;
