@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Tim Howard Photography</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="fonts/icomoon/style.css">
+
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/magnific-popup.css">
+  <link rel="stylesheet" href="css/jquery-ui.css">
+  <link rel="stylesheet" href="css/owl.carousel.min.css">
+  <link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+  <link rel="stylesheet" href="css/lightgallery.min.css">    
+
+  <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+
+  <link rel="stylesheet" href="fonts/flaticon/font/flaticon.css">
+
+  <link rel="stylesheet" href="css/swiper.css">
+
+  <link rel="stylesheet" href="css/aos.css">
+
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<!-- Where the navigation will be injected -->
+<div id="navbar"></div>
+
+
+ <div class="px-0" data-aos="fade" data-aos-delay="500">
+      <!-- Full width carousel -->
+      <div class="row mx-0 mb-5">
+        <div class="col-12 px-0">
+          <div id="mainCarousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+            <ol class="carousel-indicators">
+              <li data-target="#mainCarousel" data-slide-to="0" class="active"></li>
+              <li data-target="#mainCarousel" data-slide-to="1"></li>
+              <li data-target="#mainCarousel" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner" style="height: 100vh;">
+              <div class="carousel-item active" style="height: 100vh;">
+                <img src="images\baker\PXL_20250705_115433675.RAW-02.ORIGINAL.jpg" class="d-block w-100" alt="Feature 1" style="height: 100vh; object-fit: cover;">
+              </div>
+              <div class="carousel-item" style="height: 100vh;">
+                <img src="images\baker\PXL_20250705_122607174.RAW-02.ORIGINAL-Edit.jpg" class="d-block w-100" alt="Feature 2" style="height: 100vh; object-fit: cover;">
+              </div>
+              <div class="carousel-item" style="height: 100vh;">
+                <img src="images\PXL_20250824_215012458.RAW-02.ORIGINAL.jpg" class="d-block w-100" alt="Feature 3" style="height: 100vh; object-fit: cover;">
+              </div>
+            </div>
+            <a class="carousel-control-prev" href="#mainCarousel" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#mainCarousel" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+
+      </div>
+    </div>
+
+
+
+    
+
+    
+    
+  </div>
+
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
+  <script src="js/jquery-ui.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.stellar.min.js"></script>
+  <script src="js/jquery.countdown.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/bootstrap-datepicker.min.js"></script>
+  <script src="js/swiper.min.js"></script>
+  <script src="js/aos.js"></script>
+
+  <script src="js/picturefill.min.js"></script>
+  <script src="js/lightgallery-all.min.js"></script>
+  <script src="js/jquery.mousewheel.min.js"></script>
+
+  <script src="js/main.js"></script>
+
+  <script>
+  // Run after the DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  loadNavbar();
+
+  function loadNavbar() {
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
+        setupMobileMenu(); // Attach event after HTML is in the DOM
+      })
+      .catch(err => console.error("Failed to load navbar:", err));
+  }
+
+  function setupMobileMenu() {
+    const toggle = document.querySelector(".js-menu-toggle");
+    const mobileMenu = document.querySelector(".site-mobile-menu");
+
+    if (toggle && mobileMenu) {
+      toggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        mobileMenu.classList.toggle("active");
+      });
+    }
+  }
+});
+
+</script>
+  
+  <script>
+    $(document).ready(function(){
+      $('#lightgallery').lightGallery();
+    });
+  </script>
+
+</body>
+</html>
