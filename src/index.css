@@ -147,24 +147,23 @@ nav {
   background-color: var(--bg-secondary);
   padding: 1rem 1rem 3rem 1rem;
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition: box-shadow 0.4s ease;
+}
+
+.image-wrapper {
+  overflow: hidden;
 }
 
 .masonry-image {
   width: 100%;
   display: block;
   filter: sepia(10%) contrast(95%); /* Slight vintage feel */
-  transition: filter 0.4s ease;
+  transition: filter 0.4s ease, transform 0.4s ease;
 }
 
 .masonry-item:hover .masonry-image {
   filter: sepia(0%) contrast(100%);
-}
-
-.masonry-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-  z-index: 10;
+  transform: scale(1.1);
 }
 
 /* Overlay on hover */

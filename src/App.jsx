@@ -54,7 +54,7 @@ const App = () => {
             className={`nav-link ${page === 'about' ? 'active' : ''}`} 
             onClick={() => setPage('about')}
           >
-            Author
+            About
           </span>
         </div>
       </nav>
@@ -131,11 +131,13 @@ const Portfolio = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.05 }}
             >
-              <img
-                src={item.src}
-                alt={item.title}
-                className="masonry-image"
-              />
+              <div className="image-wrapper">
+                <img
+                  src={item.src}
+                  alt={item.title}
+                  className="masonry-image"
+                />
+              </div>
               <div className="item-overlay">
                 <p>{item.category}</p>
               </div>
@@ -164,8 +166,8 @@ const About = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          THE ALPINE <br />
-          JOURNAL
+          HIGH <br />
+          LIGHT
         </motion.h1>
         
         <motion.div
@@ -186,11 +188,11 @@ const About = () => {
           
           <div style={{ display: 'flex', gap: '3rem', marginTop: '2rem' }}>
             <div className="stat-item">
-              <span className="stat-number">12</span>
+              <span className="stat-number">18</span>
               <span className="stat-label">Years</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">15</span>
+              <span className="stat-number">34</span>
               <span className="stat-label">Countries</span>
             </div>
             <div className="stat-item">
