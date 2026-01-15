@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Manrope:wght@200;400;600&display=swap');
+@import 'lightgallery/css/lightgallery.css';
+@import 'lightgallery/css/lg-zoom.css';
+@import 'lightgallery/css/lg-thumbnail.css';
+
+:root {
+  --bg-color: #0a0a0a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #888888;
+  --accent: #d4af37; /* Muted Gold */
+  --font-display: 'Italiana', serif;
+  --font-body: 'Manrope', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The Twist: Film Grain Overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Typography */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.display-text {
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.9;
+  margin-bottom: 2rem;
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 4rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  mix-blend-mode: difference;
+}
+
+.nav-link {
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  margin-left: 2rem;
+  position: relative;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  opacity: 1;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+}
+
+/* Masonry Layout */
+.masonry-grid {
+  column-count: 1;
+  column-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.masonry-image {
+  width: 100%;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+  filter: grayscale(100%) contrast(110%);
+}
+
+.masonry-item:hover .masonry-image {
+  transform: scale(1.03);
+  filter: grayscale(0%) contrast(100%);
+}
+
+/* Filter Bar */
+.filter-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  color: var(--bg-color);
+  background-color: var(--text-primary);
+}
