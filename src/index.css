@@ -120,6 +120,23 @@ nav {
   width: 100%;
 }
 
+@media (max-width: 767px) {
+  nav {
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+  }
+
+  .links {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-link {
+    margin: 0 1rem;
+  }
+}
+
 /* Masonry Layout */
 .masonry-grid {
   column-count: 1;
@@ -185,7 +202,8 @@ nav {
   z-index: 2;
   opacity: 1; /* Always visible */
   transform: none;
-  text-align: center;
+  text-align: left;
+  min-width: 30ch;
 }
 
 .masonry-item:hover .item-overlay {

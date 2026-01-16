@@ -3,29 +3,34 @@ import LightGallery from 'lightgallery/react';
 import lgZoom from 'lightgallery/plugins/zoom';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import { motion, AnimatePresence } from 'framer-motion';
+import timPhoto from './assets/tim-howard-photo.jpg';
 
 // Dynamically import images from src/assets/images
 const imageModules = import.meta.glob('./assets/images/**/*.{jpg,jpeg,png,webp,svg}', { eager: true });
 
-const PORTFOLIO_ITEMS = Object.keys(imageModules).map((path, index) => {
-  // path example: "./assets/images/Category/ImageName.jpg"
-  const parts = path.split('/');
-  // Use the subfolder name as the category
-  const category = parts[parts.length - 2];
-  const filename = parts[parts.length - 1];
-  // Format title from filename
-  const title = filename.split('.')[0].replace(/[-_]/g, ' ');
+const getItems = (modules, filterFn = () => true) => {
+  return Object.keys(modules)
+    .filter(filterFn)
+    .map((path, index) => {
+      // path example: "./assets/images/Category/ImageName.jpg"
+      const parts = path.split('/');
+      // Use the subfolder name as the category
+      const category = parts[parts.length - 2];
+      const filename = parts[parts.length - 1];
+      // Format title from filename
+      const title = filename.split('.')[0].replace(/[-_]/g, ' ');
 
-  return {
-    id: index + 1,
-    src: imageModules[path].default,
-    category: category,
-    title: title.charAt(0).toUpperCase() + title.slice(1)
-  };
-});
+      return {
+        id: index + 1,
+        src: modules[path].default,
+        category: category,
+        title: title.charAt(0).toUpperCase() + title.slice(1)
+      };
+    });
+};
 
-const uniqueCategories = [...new Set(PORTFOLIO_ITEMS.map(item => item.category))];
-const CATEGORIES = ['All', ...uniqueCategories.sort()];
+const PORTFOLIO_ITEMS = getItems(imageModules, (path) => !path.includes('/trips/'));
+const TRIPS_ITEMS = getItems(imageModules, (path) => path.includes('/trips/'));
 
 const App = () => {
   const [page, setPage] = useState('portfolio'); // 'portfolio' or 'about'
@@ -33,6 +38,10 @@ const App = () => {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
 
   return (
     <div className="app-container">
@@ -51,6 +60,12 @@ const App = () => {
             Stories
           </span>
           <span 
+            className={`nav-link ${page === 'trips' ? 'active' : ''}`} 
+            onClick={() => setPage('trips')}
+          >
+            Trips
+          </span>
+          <span 
             className={`nav-link ${page === 'about' ? 'active' : ''}`} 
             onClick={() => setPage('about')}
           >
@@ -63,7 +78,9 @@ const App = () => {
       <main style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh' }}>
         <AnimatePresence mode="wait">
           {page === 'portfolio' ? (
-            <Portfolio key="portfolio" />
+            <Gallery key="portfolio" items={PORTFOLIO_ITEMS} />
+          ) : page === 'trips' ? (
+            <Gallery key="trips" items={TRIPS_ITEMS} allLabel="All Trips" />
           ) : (
             <About key="about" />
           )}
@@ -73,13 +90,16 @@ const App = () => {
   );
 };
 
-const Portfolio = () => {
-  const [filter, setFilter] = useState('All');
+const Gallery = ({ items, allLabel = 'All' }) => {
+  const [filter, setFilter] = useState(allLabel);
   const lightGalleryRef = useRef(null);
 
-  const filteredItems = filter === 'All' 
-    ? PORTFOLIO_ITEMS 
-    : PORTFOLIO_ITEMS.filter(item => item.category === filter);
+  const uniqueCategories = [...new Set(items.map(item => item.category))];
+  const categories = [allLabel, ...uniqueCategories.sort()];
+
+  const filteredItems = filter === allLabel 
+    ? items 
+    : items.filter(item => item.category === filter);
 
   // Refresh LightGallery when items change
   useEffect(() => {
@@ -98,7 +118,7 @@ const Portfolio = () => {
     >
       {/* Filter Controls */}
       <div className="filter-container">
-        {CATEGORIES.map(cat => (
+        {categories.map(cat => (
           <button
             key={cat}
             className={`filter-btn ${filter === cat ? 'active' : ''}`}
@@ -136,6 +156,8 @@ const Portfolio = () => {
                   src={item.src}
                   alt={item.title}
                   className="masonry-image"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="item-overlay">
@@ -148,6 +170,7 @@ const Portfolio = () => {
     </motion.div>
   );
 };
+
 
 const About = () => {
   return (
@@ -166,8 +189,8 @@ const About = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          HIGH <br />
-          LIGHT
+          INSPIRED BY <br />
+          ALPINE LIGHT
         </motion.h1>
         
         <motion.div
@@ -177,13 +200,12 @@ const About = () => {
           style={{ maxWidth: '500px', lineHeight: '1.8', fontSize: '1.1rem', color: 'var(--text-secondary)' }}
         >
           <p style={{ marginBottom: '2rem' }}>
-            Photography is a way of feeling, of touching, of loving. What you have caught on 
-            film is captured forever... It remembers little things, long after you have 
-            forgotten everything.
+            Photographing in rugged and mountainous environments, Tim's experience as a mountaineer enables him to capture 
+            images out of reach to most photographers. He uses these unique positions to capture the 
+            drama and serenity of the world's most unique locations.
           </p>
           <p>
-            Documenting the silence of the peaks and the stories written in the snow.
-            Based in the Rockies, exploring the world one ascent at a time.
+            Tim's award-winning images have been featured in publications including National Geographic and Rock & Ice Magazine.
           </p>
           
           <div style={{ display: 'flex', gap: '3rem', marginTop: '2rem' }}>
@@ -214,12 +236,13 @@ const About = () => {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, duration: 1 }}
-        style={{ height: '70vh', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+        style={{ width: 'min(70vh, 100%)', aspectRatio: '1', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', borderRadius: '50%', margin: '0 auto' }}
       >
         <img 
-          src="https://images.unsplash.com/photo-1554048612-387768052bf7?q=80&w=1000&auto=format&fit=crop" 
+          src={timPhoto}
           alt="Photographer in the wild" 
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          decoding="async"
         />
       </motion.div>
     </motion.div>
