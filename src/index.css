@@ -71,7 +71,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   padding: 2rem 4rem;
-  position: fixed;
+  position: sticky;
   top: 0;
   width: 100%;
   z-index: 50;
@@ -161,10 +161,11 @@ nav {
   position: relative;
   cursor: zoom-in;
   /* Polaroid / Print style */
-  background-color: var(--bg-secondary);
+  /* background-color: var(--bg-secondary); */
   padding: 1rem 1rem 3rem 1rem;
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   transition: box-shadow 0.4s ease;
+  vertical-align: top;
 }
 
 .image-wrapper {
@@ -227,15 +228,28 @@ nav {
   letter-spacing: 0.1em;
 }
 
+.gallery-container {
+  padding: 0 4rem;
+}
+
 /* Filter Bar */
 .filter-container {
-  margin-bottom: 5rem;
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
   justify-content: center;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 2rem;
+  position: sticky;
+  top: 6rem;
+  z-index: 40;
+  background-color: var(--bg-color);
+  padding-top: 1rem;
+}
+
+.filter-container.active {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
 }
 
 .filter-btn {
@@ -265,18 +279,53 @@ nav {
   display: none;
 }
 
+@media (max-width: 767px) {
+  .filter-container {
+    top: 7rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .filter-container::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-btn {
+    flex-shrink: 0;
+  }
+  .gallery-container {
+    padding: 0 1rem;
+  }
+}
+
 /* About Section Styles */
 .about-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 6rem;
   align-items: center;
+  padding: 0 4rem;
 }
 
 @media (min-width: 900px) {
   .about-grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.about-description {
+  max-width: 500px;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.about-description p {
+  margin-bottom: 2rem;
 }
 
 .stat-item {
@@ -302,4 +351,53 @@ nav {
   color: var(--text-secondary);
   letter-spacing: 0.15em;
   margin-top: 0.5rem;
+}
+
+.stats-container {
+  display: flex;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.contact-link-wrapper {
+  margin-top: 3rem;
+}
+
+.contact-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.about-image {
+  width: min(70vh, 100%);
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.about-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lg-sub-html p {
+  text-transform: uppercase;
+}
+
+footer {
+  padding: 3rem 2rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
 }

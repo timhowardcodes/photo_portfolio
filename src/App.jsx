@@ -3,6 +3,7 @@ import LightGallery from 'lightgallery/react';
 import lgZoom from 'lightgallery/plugins/zoom';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import { motion, AnimatePresence } from 'framer-motion';
+import exifr from 'exifr';
 import timPhoto from './assets/tim-howard-photo.jpg';
 
 // Dynamically import images from src/assets/images
@@ -10,6 +11,7 @@ const imageModules = import.meta.glob('./assets/images/**/*.{jpg,jpeg,png,webp,s
 
 const getItems = (modules, filterFn = () => true) => {
   return Object.keys(modules)
+    .filter((path) => !path.includes('_thumb.'))
     .filter(filterFn)
     .map((path, index) => {
       // path example: "./assets/images/Category/ImageName.jpg"
@@ -17,12 +19,19 @@ const getItems = (modules, filterFn = () => true) => {
       // Use the subfolder name as the category
       const category = parts[parts.length - 2];
       const filename = parts[parts.length - 1];
+
+      // Find thumbnail if it exists
+      const dotIndex = path.lastIndexOf('.');
+      const thumbPath = path.substring(0, dotIndex) + '_thumb' + path.substring(dotIndex);
+      const thumbSrc = modules[thumbPath] ? modules[thumbPath].default : modules[path].default;
+
       // Format title from filename
       const title = filename.split('.')[0].replace(/[-_]/g, ' ');
 
       return {
         id: index + 1,
         src: modules[path].default,
+        thumb: thumbSrc,
         category: category,
         title: title.charAt(0).toUpperCase() + title.slice(1)
       };
@@ -75,7 +84,7 @@ const App = () => {
       </nav>
 
       {/* Main Content Area */}
-      <main style={{ paddingTop: '140px', paddingBottom: '4rem', minHeight: '100vh' }}>
+      <main style={{ paddingBottom: '4rem', minHeight: '100vh' }}>
         <AnimatePresence mode="wait">
           {page === 'portfolio' ? (
             <Gallery key="portfolio" items={PORTFOLIO_ITEMS} />
@@ -86,27 +95,77 @@ const App = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <footer>
+        <p className="footer-text">&copy; {new Date().getFullYear()} Tim Howard. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
 
 const Gallery = ({ items, allLabel = 'All' }) => {
   const [filter, setFilter] = useState(allLabel);
+  const [galleryItems, setGalleryItems] = useState(items);
   const lightGalleryRef = useRef(null);
+  const filterContainerRef = useRef(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = (e) => {
+    isDown.current = true;
+    filterContainerRef.current.classList.add('active');
+    startX.current = e.pageX - filterContainerRef.current.offsetLeft;
+    scrollLeft.current = filterContainerRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    isDown.current = false;
+    filterContainerRef.current?.classList.remove('active');
+  };
+
+  const handleMouseUp = () => {
+    isDown.current = false;
+    filterContainerRef.current?.classList.remove('active');
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown.current) return;
+    e.preventDefault();
+    const x = e.pageX - filterContainerRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2; // Scroll-fast
+    filterContainerRef.current.scrollLeft = scrollLeft.current - walk;
+  };
 
   const uniqueCategories = [...new Set(items.map(item => item.category))];
   const categories = [allLabel, ...uniqueCategories.sort()];
 
   const filteredItems = filter === allLabel 
-    ? items 
-    : items.filter(item => item.category === filter);
+    ? galleryItems 
+    : galleryItems.filter(item => item.category === filter);
 
   // Refresh LightGallery when items change
   useEffect(() => {
     if (lightGalleryRef.current) {
       lightGalleryRef.current.refresh();
     }
-  }, [filter]);
+  }, [filter, galleryItems]);
+
+  const handleImageLoad = (e, itemId) => {
+    const img = e.target;
+    exifr.parse(img, { iptc: true }).then(output => {
+      if (!output) return;
+      
+      let title = output.Caption || output['Caption-Abstract'] || output.ImageDescription;
+      if (Array.isArray(title)) title = title[0];
+      
+      if (title) {
+        setGalleryItems(prev => prev.map(item => 
+          item.id === itemId ? { ...item, title } : item
+        ));
+      }
+    });
+  };
 
   return (
     <motion.div
@@ -114,10 +173,17 @@ const Gallery = ({ items, allLabel = 'All' }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      style={{ padding: '0 4rem' }}
+      className="gallery-container"
     >
       {/* Filter Controls */}
-      <div className="filter-container">
+      <div 
+        className="filter-container"
+        ref={filterContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         {categories.map(cat => (
           <button
             key={cat}
@@ -150,14 +216,16 @@ const Gallery = ({ items, allLabel = 'All' }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.05 }}
+              style={{ position: 'relative' }}
             >
               <div className="image-wrapper">
                 <img
-                  src={item.src}
+                  src={item.thumb}
                   alt={item.title}
                   className="masonry-image"
                   loading="lazy"
                   decoding="async"
+                  onLoad={(e) => handleImageLoad(e, item.id)}
                 />
               </div>
               <div className="item-overlay">
@@ -179,7 +247,6 @@ const About = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.6 }}
-      style={{ padding: '0 4rem' }}
       className="about-grid"
     >
       <div className="about-text">
@@ -194,21 +261,21 @@ const About = () => {
         </motion.h1>
         
         <motion.div
+          className="about-description"
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          style={{ maxWidth: '500px', lineHeight: '1.8', fontSize: '1.1rem', color: 'var(--text-secondary)' }}
         >
-          <p style={{ marginBottom: '2rem' }}>
-            Photographing in rugged and mountainous environments, Tim's experience as a mountaineer enables him to capture 
-            images out of reach to most photographers. He uses these unique positions to capture the 
-            drama and serenity of the world's most unique locations.
+          <p>
+           Photographing in some of the world's most extreme environments, Tim's extensive experience as a mountaineer and backcountry skier provide him 
+           with a window into a world that most will never see. From these unique positions he captures the drama and 
+           dynamism of nature at its best and worst.
           </p>
           <p>
-            Tim's award-winning images have been featured in publications including National Geographic and Rock & Ice Magazine.
+          Tim's award-winning images have been featured in publications including National Geographic and Rock & Ice Magazine.
           </p>
           
-          <div style={{ display: 'flex', gap: '3rem', marginTop: '2rem' }}>
+          <div className="stats-container">
             <div className="stat-item">
               <span className="stat-number">18</span>
               <span className="stat-label">Years</span>
@@ -218,13 +285,13 @@ const About = () => {
               <span className="stat-label">Countries</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">35mm</span>
-              <span className="stat-label">Film</span>
+              <span className="stat-number">24mm</span>
+              <span className="stat-label">Favourite lens</span>
             </div>
           </div>
 
-          <div style={{ marginTop: '3rem' }}>
-             <a href="mailto:tim@timhoward.pro" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.2rem' }}>
+          <div className="contact-link-wrapper">
+             <a href="mailto:tim@timhoward.pro" className="contact-link">
                GET IN TOUCH &rarr;
              </a>
           </div>
@@ -236,12 +303,10 @@ const About = () => {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, duration: 1 }}
-        style={{ width: 'min(70vh, 100%)', aspectRatio: '1', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', borderRadius: '50%', margin: '0 auto' }}
       >
         <img 
           src={timPhoto}
           alt="Photographer in the wild" 
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           decoding="async"
         />
       </motion.div>
