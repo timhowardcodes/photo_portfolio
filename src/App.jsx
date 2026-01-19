@@ -106,6 +106,7 @@ const App = () => {
 const Gallery = ({ items, allLabel = 'All' }) => {
   const [filter, setFilter] = useState(allLabel);
   const [galleryItems, setGalleryItems] = useState(items);
+  const [visibleCount, setVisibleCount] = useState(6);
   const lightGalleryRef = useRef(null);
   const filterContainerRef = useRef(null);
   const isDown = useRef(false);
@@ -144,12 +145,22 @@ const Gallery = ({ items, allLabel = 'All' }) => {
     ? galleryItems 
     : galleryItems.filter(item => item.category === filter);
 
+  const displayedItems = filteredItems.slice(0, visibleCount);
+
   // Refresh LightGallery when items change
   useEffect(() => {
     if (lightGalleryRef.current) {
       lightGalleryRef.current.refresh();
     }
-  }, [filter, galleryItems]);
+  }, [filter, galleryItems, visibleCount]);
+
+  useEffect(() => {
+    setVisibleCount(6);
+    const timer = setTimeout(() => {
+      setVisibleCount(10000);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [filter]);
 
   const handleImageLoad = (e, itemId) => {
     const img = e.target;
@@ -204,7 +215,7 @@ const Gallery = ({ items, allLabel = 'All' }) => {
         plugins={[lgThumbnail, lgZoom]}
         elementClassNames="masonry-grid"
       >
-        {filteredItems.map((item, index) => (
+        {displayedItems.map((item, index) => (
           <a
             key={item.id}
             href={item.src}
@@ -215,7 +226,7 @@ const Gallery = ({ items, allLabel = 'All' }) => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.05 }}
+              transition={{ duration: 0.6, delay: (index % 10) * 0.05 }}
               style={{ position: 'relative' }}
             >
               <div className="image-wrapper">
@@ -223,7 +234,7 @@ const Gallery = ({ items, allLabel = 'All' }) => {
                   src={item.thumb}
                   alt={item.title}
                   className="masonry-image"
-                  loading="lazy"
+                  loading={index < 6 ? "eager" : "lazy"}
                   decoding="async"
                   onLoad={(e) => handleImageLoad(e, item.id)}
                 />
