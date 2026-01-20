@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LightGallery from 'lightgallery/react';
 import lgZoom from 'lightgallery/plugins/zoom';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import { motion, AnimatePresence } from 'framer-motion';
-import exifr from 'exifr';
 import timPhoto from './assets/tim-howard-photo.jpg';
 
 // Dynamically import images from src/assets/images
@@ -11,7 +10,7 @@ const imageModules = import.meta.glob('./assets/images/**/*.{jpg,jpeg,png,webp,s
 
 const getItems = (modules, filterFn = () => true) => {
   return Object.keys(modules)
-    .filter((path) => !path.includes('_thumb.'))
+    .filter((path) => !path.includes('_thumb.') && !path.includes('/Thumbs/'))
     .filter(filterFn)
     .map((path, index) => {
       // path example: "./assets/images/Category/ImageName.jpg"
@@ -21,8 +20,11 @@ const getItems = (modules, filterFn = () => true) => {
       const filename = parts[parts.length - 1];
 
       // Find thumbnail if it exists
-      const dotIndex = path.lastIndexOf('.');
-      const thumbPath = path.substring(0, dotIndex) + '_thumb' + path.substring(dotIndex);
+      const dotIndex = filename.lastIndexOf('.');
+      const nameWithoutExt = filename.substring(0, dotIndex);
+      const ext = filename.substring(dotIndex);
+      const thumbFilename = `${nameWithoutExt}_thumb${ext}`;
+      const thumbPath = `./assets/images/Thumbs/${thumbFilename}`;
       const thumbSrc = modules[thumbPath] ? modules[thumbPath].default : modules[path].default;
 
       // Format title from filename
@@ -106,7 +108,7 @@ const App = () => {
 const Gallery = ({ items, allLabel = 'All' }) => {
   const [filter, setFilter] = useState(allLabel);
   const [galleryItems, setGalleryItems] = useState(items);
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [visibleCount, setVisibleCount] = useState(12);
   const lightGalleryRef = useRef(null);
   const filterContainerRef = useRef(null);
   const isDown = useRef(false);
@@ -138,12 +140,14 @@ const Gallery = ({ items, allLabel = 'All' }) => {
     filterContainerRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
-  const uniqueCategories = [...new Set(items.map(item => item.category))];
+  const uniqueCategories = useMemo(() => [...new Set(items.map(item => item.category))], [items]);
   const categories = [allLabel, ...uniqueCategories.sort()];
 
-  const filteredItems = filter === allLabel 
-    ? galleryItems 
-    : galleryItems.filter(item => item.category === filter);
+  const filteredItems = useMemo(() => {
+    return filter === allLabel 
+      ? galleryItems 
+      : galleryItems.filter(item => item.category === filter);
+  }, [filter, galleryItems, allLabel]);
 
   const displayedItems = filteredItems.slice(0, visibleCount);
 
@@ -155,27 +159,36 @@ const Gallery = ({ items, allLabel = 'All' }) => {
   }, [filter, galleryItems, visibleCount]);
 
   useEffect(() => {
-    setVisibleCount(6);
-    const timer = setTimeout(() => {
-      setVisibleCount(10000);
-    }, 2000);
-    return () => clearTimeout(timer);
+    setVisibleCount(12);
   }, [filter]);
 
-  const handleImageLoad = (e, itemId) => {
+  const loadMore = () => {
+    setVisibleCount(prev => Math.min(prev + 12, filteredItems.length));
+  };
+
+  const handleImageLoad = async (e, itemId) => {
     const img = e.target;
-    exifr.parse(img, { iptc: true }).then(output => {
+    try {
+      const { default: exifr } = await import('exifr');
+      const output = await exifr.parse(img, { iptc: true });
+      
       if (!output) return;
       
       let title = output.Caption || output['Caption-Abstract'] || output.ImageDescription;
       if (Array.isArray(title)) title = title[0];
       
       if (title) {
-        setGalleryItems(prev => prev.map(item => 
-          item.id === itemId ? { ...item, title } : item
-        ));
+        setGalleryItems(prev => {
+          const currentItem = prev.find(item => item.id === itemId);
+          if (currentItem && currentItem.title === title) return prev;
+          return prev.map(item => 
+            item.id === itemId ? { ...item, title } : item
+          );
+        });
       }
-    });
+    } catch (error) {
+      console.debug("EXIF parsing failed", error);
+    }
   };
 
   return (
@@ -234,7 +247,7 @@ const Gallery = ({ items, allLabel = 'All' }) => {
                   src={item.thumb}
                   alt={item.title}
                   className="masonry-image"
-                  loading={index < 6 ? "eager" : "lazy"}
+                  loading="lazy"
                   decoding="async"
                   onLoad={(e) => handleImageLoad(e, item.id)}
                 />
@@ -246,6 +259,13 @@ const Gallery = ({ items, allLabel = 'All' }) => {
           </a>
         ))}
       </LightGallery>
+
+      {visibleCount < filteredItems.length && (
+        <motion.div
+          onViewportEnter={loadMore}
+          style={{ width: '100%', height: 50 }}
+        />
+      )}
     </motion.div>
   );
 };
