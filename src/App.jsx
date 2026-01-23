@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LightGallery from 'lightgallery/react';
 import lgZoom from 'lightgallery/plugins/zoom';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
+import lgHash from 'lightgallery/plugins/hash';
 import { motion, AnimatePresence } from 'framer-motion';
 import timPhoto from './assets/tim-howard-photo.jpg';
 
@@ -28,14 +29,17 @@ const getItems = (modules, filterFn = () => true) => {
       const thumbSrc = modules[thumbPath] ? modules[thumbPath].default : modules[path].default;
 
       // Format title from filename
-      const title = filename.split('.')[0].replace(/[-_]/g, ' ');
+      const nameOnly = filename.split('.')[0];
+      const title = nameOnly.replace(/[-_]/g, ' ');
+      const slug = nameOnly.replace(/[-_]/g, '-').toLowerCase();
 
       return {
         id: index + 1,
         src: modules[path].default,
         thumb: thumbSrc,
         category: category,
-        title: title.charAt(0).toUpperCase() + title.slice(1)
+        title: title.charAt(0).toUpperCase() + title.slice(1),
+        slug: slug
       };
     });
 };
@@ -48,6 +52,14 @@ const App = () => {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
+
+    // Handle deep linking
+    const hash = window.location.hash;
+    if (hash.includes('lg=trips')) {
+      setPage('trips');
+    } else if (hash.includes('lg=portfolio')) {
+      setPage('portfolio');
+    }
   }, []);
 
   useEffect(() => {
@@ -89,9 +101,9 @@ const App = () => {
       <main style={{ paddingBottom: '4rem', minHeight: '100vh' }}>
         <AnimatePresence mode="wait">
           {page === 'portfolio' ? (
-            <Gallery key="portfolio" items={PORTFOLIO_ITEMS} />
+            <Gallery key="portfolio" items={PORTFOLIO_ITEMS} galleryId="portfolio" />
           ) : page === 'trips' ? (
-            <Gallery key="trips" items={TRIPS_ITEMS} allLabel="All Trips" />
+            <Gallery key="trips" items={TRIPS_ITEMS} allLabel="All Trips" galleryId="trips" />
           ) : (
             <About key="about" />
           )}
@@ -105,10 +117,23 @@ const App = () => {
   );
 };
 
-const Gallery = ({ items, allLabel = 'All' }) => {
+const Gallery = ({ items, allLabel = 'All', galleryId }) => {
   const [filter, setFilter] = useState(allLabel);
   const [galleryItems, setGalleryItems] = useState(items);
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [visibleCount, setVisibleCount] = useState(() => {
+    const hash = window.location.hash;
+    if (galleryId && hash.includes(`lg=${galleryId}`) && hash.includes('&slide=')) {
+      const params = new URLSearchParams(hash.substring(1));
+      const slide = params.get('slide');
+      if (slide) {
+        const index = items.findIndex(item => item.slug === slide);
+        if (index !== -1) {
+          return Math.max(12, index + 5);
+        }
+      }
+    }
+    return 12;
+  });
   const lightGalleryRef = useRef(null);
   const filterContainerRef = useRef(null);
   const isDown = useRef(false);
@@ -225,8 +250,11 @@ const Gallery = ({ items, allLabel = 'All' }) => {
           lightGalleryRef.current = detail.instance;
         }}
         speed={500}
-        plugins={[lgThumbnail, lgZoom]}
+        plugins={[lgThumbnail, lgZoom, lgHash]}
         elementClassNames="masonry-grid"
+        galleryId={galleryId}
+        customSlideName={true}
+        download={false}
       >
         {displayedItems.map((item, index) => (
           <a
@@ -234,6 +262,7 @@ const Gallery = ({ items, allLabel = 'All' }) => {
             href={item.src}
             className="masonry-item"
             data-sub-html={`<h4>${item.title}</h4><p>${item.category}</p>`}
+            data-slide-name={item.slug}
           >
             <motion.div
               initial={{ opacity: 0, y: 50 }}
