@@ -44,8 +44,9 @@ const getItems = (modules, filterFn = () => true) => {
     });
 };
 
-const PORTFOLIO_ITEMS = getItems(imageModules, (path) => !path.includes('/trips/'));
-const TRIPS_ITEMS = getItems(imageModules, (path) => path.includes('/trips/'));
+const PORTFOLIO_ITEMS = getItems(imageModules, (path) => !path.includes('/stories/') && !path.includes('/clients/'));
+const STORIES_ITEMS = getItems(imageModules, (path) => path.includes('/stories/'));
+const CLIENT_ITEMS = getItems(imageModules, (path) => path.includes('/clients/'));
 
 const App = () => {
   const [page, setPage] = useState('portfolio'); // 'portfolio' or 'about'
@@ -55,10 +56,13 @@ const App = () => {
 
     // Handle deep linking
     const hash = window.location.hash;
-    if (hash.includes('lg=trips')) {
-      setPage('trips');
+    if (hash.includes('lg=stories')) {
+      setPage('stories');
     } else if (hash.includes('lg=portfolio')) {
       setPage('portfolio');
+    }
+    if (window.location.pathname === '/clients') {
+      setPage('clients');
     }
   }, []);
 
@@ -72,7 +76,7 @@ const App = () => {
       
       {/* Navigation */}
       <nav>
-        <div className="logo">
+        <div className="logo" onClick={() => setPage('portfolio')} style={{ cursor: 'pointer' }}>
           TIM HOWARD <span style={{ color: 'var(--text-secondary)', fontSize: '0.8em' }}>// PHOTOGRAPHER</span>
         </div>
         <div className="links">
@@ -80,13 +84,13 @@ const App = () => {
             className={`nav-link ${page === 'portfolio' ? 'active' : ''}`} 
             onClick={() => setPage('portfolio')}
           >
-            Stories
+            Images
           </span>
           <span 
-            className={`nav-link ${page === 'trips' ? 'active' : ''}`} 
-            onClick={() => setPage('trips')}
+            className={`nav-link ${page === 'stories' ? 'active' : ''}`} 
+            onClick={() => setPage('stories')}
           >
-            Trips
+            Stories
           </span>
           <span 
             className={`nav-link ${page === 'about' ? 'active' : ''}`} 
@@ -102,8 +106,10 @@ const App = () => {
         <AnimatePresence mode="wait">
           {page === 'portfolio' ? (
             <Gallery key="portfolio" items={PORTFOLIO_ITEMS} galleryId="portfolio" />
-          ) : page === 'trips' ? (
-            <Gallery key="trips" items={TRIPS_ITEMS} allLabel="All Trips" galleryId="trips" />
+          ) : page === 'stories' ? (
+            <Gallery key="stories" items={STORIES_ITEMS} allLabel="All Stories" galleryId="stories" />
+          ) : page === 'clients' ? (
+            <Clients key="clients" />
           ) : (
             <About key="about" />
           )}
@@ -370,6 +376,95 @@ const About = () => {
           decoding="async"
         />
       </motion.div>
+    </motion.div>
+  );
+};
+
+const Clients = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // SHA-256 hash for "1234"
+    const hash = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === hash) {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Incorrect password');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: '2rem'
+        }}
+      >
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem' }}>Client Access</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px' }}>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter Password"
+            style={{
+              padding: '0.8rem',
+              fontSize: '1rem',
+              width: '100%',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              outline: 'none'
+            }}
+          />
+          <button
+            type="submit"
+            className="filter-btn"
+            style={{
+              border: '1px solid var(--accent)',
+              padding: '0.5rem 2rem',
+              color: 'var(--accent)',
+              marginTop: '1rem'
+            }}
+          >
+            ENTER
+          </button>
+          {error && <p style={{ color: 'var(--accent)', fontSize: '0.9rem' }}>{error}</p>}
+        </form>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="gallery-container" style={{ padding: '4rem 0', textAlign: 'center' }}>
+        <h1 className="display-text" style={{ fontSize: '3rem', marginBottom: '1rem' }}>Private Gallery</h1>
+      </div>
+      <Gallery items={CLIENT_ITEMS} galleryId="clients" />
     </motion.div>
   );
 };
