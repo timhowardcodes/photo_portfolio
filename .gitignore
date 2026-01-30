@@ -23,6 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Python
+venv/
+__pycache__/
+*.pyc
+
 
 # Untracked project files and folders
 src/assets/pending_photos/*
