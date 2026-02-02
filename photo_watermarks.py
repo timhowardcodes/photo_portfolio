@@ -183,5 +183,5 @@ def process_images_with_watermark(folder_path):
     print("Process complete.")
 
 
-folder_path = r"D:\Coding\Python\my-portfolio\src\assets\pending_photos\high_quality"
+folder_path = r"D:\Coding\Python\my-portfolio\src\assets\pending_photos"
 process_images_with_watermark(folder_path)
