@@ -160,11 +160,14 @@ const App = () => {
   );
 };
 
-const Gallery = ({ items, allLabel = 'All', galleryId, basePath, currentPath, onNavigate }) => {
-  const uniqueCategories = useMemo(() => [...new Set(items.map(item => item.category))], [items]);
-  const categories = [allLabel, ...uniqueCategories.sort()];
+const Gallery = ({ items, allLabel = 'All', galleryId, basePath, currentPath, onNavigate, showAll = true }) => {
+  const uniqueCategories = useMemo(() => [...new Set(items.map(item => item.category))].sort(), [items]);
+  const categories = showAll ? [allLabel, ...uniqueCategories] : uniqueCategories;
 
-  const [localFilter, setLocalFilter] = useState(allLabel);
+  const [localFilter, setLocalFilter] = useState(() => {
+    if (showAll) return allLabel;
+    return uniqueCategories.length > 0 ? uniqueCategories[0] : allLabel;
+  });
 
   const filter = useMemo(() => {
     if (!basePath) return localFilter;
@@ -445,8 +448,7 @@ const Clients = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // SHA-256 hash for "1234"
-    const hash = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+    const hash = "480b5712d70eb03511f232e524d49afc01b978d784fe34fd80e5bb663fa47cf2";
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -522,7 +524,7 @@ const Clients = () => {
       <div className="gallery-container" style={{ padding: '4rem 0', textAlign: 'center' }}>
         <h1 className="display-text" style={{ fontSize: '3rem', marginBottom: '1rem' }}>Private Gallery</h1>
       </div>
-      <Gallery items={CLIENT_ITEMS} galleryId="clients" />
+      <Gallery items={CLIENT_ITEMS} galleryId="clients" showAll={false} />
     </motion.div>
   );
 };
