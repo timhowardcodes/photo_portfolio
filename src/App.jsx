@@ -13,6 +13,11 @@ const getItems = (modules, filterFn = () => true) => {
   return Object.keys(modules)
     .filter((path) => !path.includes('_thumb.') && !path.includes('/Thumbs/'))
     .filter(filterFn)
+    .sort((a, b) => {
+      const nameA = a.split('/').pop();
+      const nameB = b.split('/').pop();
+      return nameA.localeCompare(nameB, undefined, { numeric: true });
+    })
     .map((path, index) => {
       // path example: "./assets/images/Category/ImageName.jpg"
       const parts = path.split('/');
@@ -30,8 +35,9 @@ const getItems = (modules, filterFn = () => true) => {
 
       // Format title from filename
       const nameOnly = filename.split('.')[0];
-      const title = nameOnly.replace(/[-_]/g, ' ');
-      const slug = nameOnly.replace(/[-_]/g, '-').toLowerCase();
+      const cleanName = nameOnly.replace(/^\d+[-_]/, '');
+      const title = cleanName.replace(/[-_]/g, ' ');
+      const slug = cleanName.replace(/[-_]/g, '-').toLowerCase();
 
       return {
         id: index + 1,
