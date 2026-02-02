@@ -299,6 +299,7 @@ const Gallery = ({ items, allLabel = 'All', galleryId, basePath, currentPath, on
                 onNavigate(cat === allLabel ? basePath : `${basePath}/${cat.toLowerCase()}`);
               } else {
                 setLocalFilter(cat);
+                window.scrollTo(0, 0);
               }
             }}
           >
