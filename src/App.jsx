@@ -55,26 +55,34 @@ const STORIES_ITEMS = getItems(imageModules, (path) => path.includes('/stories/'
 const CLIENT_ITEMS = getItems(imageModules, (path) => path.includes('/clients/'));
 
 const App = () => {
-  const [page, setPage] = useState('portfolio'); // 'portfolio' or 'about'
+  const [path, setPath] = useState(window.location.pathname);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
 
-    // Handle deep linking
-    const hash = window.location.hash;
-    if (hash.includes('lg=stories')) {
-      setPage('stories');
-    } else if (hash.includes('lg=portfolio')) {
-      setPage('portfolio');
-    }
-    if (window.location.pathname === '/clients') {
-      setPage('clients');
-    }
+    const onPopState = () => {
+      setPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [page]);
+  const navigate = (newPath) => {
+    if (newPath !== window.location.pathname) {
+      window.history.pushState(null, '', newPath);
+      setPath(newPath);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  let page = 'portfolio';
+  if (path.startsWith('/stories')) {
+    page = 'stories';
+  } else if (path.startsWith('/about')) {
+    page = 'about';
+  } else if (path.startsWith('/clients')) {
+    page = 'clients';
+  }
 
   return (
     <div className="app-container">
@@ -82,25 +90,25 @@ const App = () => {
       
       {/* Navigation */}
       <nav>
-        <div className="logo" onClick={() => setPage('portfolio')} style={{ cursor: 'pointer' }}>
+        <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           TIM HOWARD <span style={{ color: 'var(--text-secondary)', fontSize: '0.8em' }}>// PHOTOGRAPHER</span>
         </div>
         <div className="links">
           <span 
             className={`nav-link ${page === 'portfolio' ? 'active' : ''}`} 
-            onClick={() => setPage('portfolio')}
+            onClick={() => navigate('/images')}
           >
             Images
           </span>
           <span 
             className={`nav-link ${page === 'stories' ? 'active' : ''}`} 
-            onClick={() => setPage('stories')}
+            onClick={() => navigate('/stories')}
           >
             Stories
           </span>
           <span 
             className={`nav-link ${page === 'about' ? 'active' : ''}`} 
-            onClick={() => setPage('about')}
+            onClick={() => navigate('/about')}
           >
             About
           </span>
@@ -111,9 +119,24 @@ const App = () => {
       <main style={{ paddingBottom: '4rem', minHeight: '100vh' }}>
         <AnimatePresence mode="wait">
           {page === 'portfolio' ? (
-            <Gallery key="portfolio" items={PORTFOLIO_ITEMS} galleryId="portfolio" />
+            <Gallery 
+              key="portfolio" 
+              items={PORTFOLIO_ITEMS} 
+              galleryId="portfolio" 
+              basePath="/images"
+              currentPath={path}
+              onNavigate={navigate}
+            />
           ) : page === 'stories' ? (
-            <Gallery key="stories" items={STORIES_ITEMS} allLabel="All Stories" galleryId="stories" />
+            <Gallery 
+              key="stories" 
+              items={STORIES_ITEMS} 
+              allLabel="All Stories" 
+              galleryId="stories" 
+              basePath="/stories"
+              currentPath={path}
+              onNavigate={navigate}
+            />
           ) : page === 'clients' ? (
             <Clients key="clients" />
           ) : (
@@ -129,8 +152,25 @@ const App = () => {
   );
 };
 
-const Gallery = ({ items, allLabel = 'All', galleryId }) => {
-  const [filter, setFilter] = useState(allLabel);
+const Gallery = ({ items, allLabel = 'All', galleryId, basePath, currentPath, onNavigate }) => {
+  const uniqueCategories = useMemo(() => [...new Set(items.map(item => item.category))], [items]);
+  const categories = [allLabel, ...uniqueCategories.sort()];
+
+  const [localFilter, setLocalFilter] = useState(allLabel);
+
+  const filter = useMemo(() => {
+    if (!basePath) return localFilter;
+    if (currentPath === '/' && basePath === '/images') return allLabel;
+    if (currentPath === basePath || currentPath === basePath + '/') return allLabel;
+    
+    if (currentPath && currentPath.startsWith(basePath + '/')) {
+      const slug = currentPath.substring(basePath.length + 1);
+      const category = uniqueCategories.find(c => c.toLowerCase() === slug.toLowerCase());
+      return category || allLabel;
+    }
+    return allLabel;
+  }, [currentPath, basePath, allLabel, uniqueCategories, localFilter]);
+
   const [galleryItems, setGalleryItems] = useState(items);
   const [visibleCount, setVisibleCount] = useState(() => {
     const hash = window.location.hash;
@@ -176,9 +216,6 @@ const Gallery = ({ items, allLabel = 'All', galleryId }) => {
     const walk = (x - startX.current) * 2; // Scroll-fast
     filterContainerRef.current.scrollLeft = scrollLeft.current - walk;
   };
-
-  const uniqueCategories = useMemo(() => [...new Set(items.map(item => item.category))], [items]);
-  const categories = [allLabel, ...uniqueCategories.sort()];
 
   const filteredItems = useMemo(() => {
     return filter === allLabel 
@@ -249,7 +286,13 @@ const Gallery = ({ items, allLabel = 'All', galleryId }) => {
           <button
             key={cat}
             className={`filter-btn ${filter === cat ? 'active' : ''}`}
-            onClick={() => setFilter(cat)}
+            onClick={() => {
+              if (basePath && onNavigate) {
+                onNavigate(cat === allLabel ? basePath : `${basePath}/${cat.toLowerCase()}`);
+              } else {
+                setLocalFilter(cat);
+              }
+            }}
           >
             {cat}
           </button>
