@@ -55,7 +55,15 @@ const STORIES_ITEMS = getItems(imageModules, (path) => path.includes('/stories/'
 const CLIENT_ITEMS = getItems(imageModules, (path) => path.includes('/clients/'));
 
 const App = () => {
-  const [path, setPath] = useState(window.location.pathname);
+  const [path, setPath] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      window.history.replaceState(null, '', redirect + window.location.hash);
+      return redirect;
+    }
+    return window.location.pathname;
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
