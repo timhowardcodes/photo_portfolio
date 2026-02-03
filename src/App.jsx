@@ -65,14 +65,25 @@ const App = () => {
     return window.location.pathname;
   });
 
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
 
     const onPopState = () => {
       setPath(window.location.pathname);
     };
+
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+
     window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const navigate = (newPath) => {
@@ -81,6 +92,10 @@ const App = () => {
       setPath(newPath);
       window.scrollTo(0, 0);
     }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   let page = 'portfolio';
@@ -152,6 +167,42 @@ const App = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            key="back-to-top"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            onClick={scrollToTop}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              right: '2rem',
+              zIndex: 99,
+              padding: '0.8rem',
+              borderRadius: '50%',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              width: '45px',
+              height: '45px'
+            }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <footer>
         <p className="footer-text">&copy; {new Date().getFullYear()} Tim Howard. All rights reserved.</p>
