@@ -427,6 +427,19 @@ const About = () => {
       transition={{ duration: 0.6 }}
       className="about-grid"
     >
+      <motion.div 
+        className="about-image"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 1 }}
+      >
+        <img 
+          src={timPhoto}
+          alt="Photographer in the wild" 
+          decoding="async"
+        />
+      </motion.div>
+
       <div className="about-text">
         <motion.h1 
           className="display-text"
@@ -434,8 +447,7 @@ const About = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          INSPIRED BY <br />
-          ALPINE LIGHT
+          Capturing the Wild <br />
         </motion.h1>
         
         <motion.div
@@ -453,20 +465,7 @@ const About = () => {
           Tim's award-winning images have been featured in publications including National Geographic and Rock & Ice Magazine.
           </p>
           
-          <div className="stats-container">
-            <div className="stat-item">
-              <span className="stat-number">18</span>
-              <span className="stat-label">Years</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">34</span>
-              <span className="stat-label">Countries</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">24mm</span>
-              <span className="stat-label">Favourite lens</span>
-            </div>
-          </div>
+
 
           <div className="contact-link-wrapper">
              <a href="mailto:tim@timhoward.pro" className="contact-link">
@@ -476,18 +475,7 @@ const About = () => {
         </motion.div>
       </div>
 
-      <motion.div 
-        className="about-image"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 1 }}
-      >
-        <img 
-          src={timPhoto}
-          alt="Photographer in the wild" 
-          decoding="async"
-        />
-      </motion.div>
+
     </motion.div>
   );
 };

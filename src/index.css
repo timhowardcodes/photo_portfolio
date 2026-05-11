@@ -312,7 +312,7 @@ nav {
   grid-template-columns: 1fr;
   gap: 6rem;
   align-items: center;
-  padding: 0 4rem;
+  padding: 5rem 4rem;
 }
 
 @media (min-width: 900px) {
@@ -392,7 +392,7 @@ nav {
 
 @media (max-width: 767px) {
   .about-grid {
-    padding: 0 1.5rem;
+    padding: 3rem 1.5rem;
     gap: 3rem;
     overflow-x: hidden;
   }
